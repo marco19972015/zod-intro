@@ -15,15 +15,17 @@ export default class AppComponent implements OnInit {
 
     const UserSchema = z.object({
       username: z.string(),
+      friends: z.array(z.string()).nonempty(),
     }).strict()
     
     type User = z.infer<typeof UserSchema>
 
     const user: User = { 
       username: 'Marco',
+      friends: ["Nena", "Yoda"]
       
     }
-
+    UserSchema.shape.friends.element
     console.log(UserSchema.parse(user));
     
   }
@@ -55,55 +57,23 @@ export default class AppComponent implements OnInit {
   // In order to use ZOD we import the object z from 'zod'
   // The z object does everything we want to do with zod (no need to worry about anything else)
 
-  // In version 5 - We go over some "things" that we can do with the Object type
+  // In version 6 - we go over the Array type
+  // Lets say we want to have an array of freinds, we first define it in the object
+  //            friends: z.array(z.string())
 
-  // So instead of using parsing an individual in line 33 
-  //            console.log(UserSchema.safeParse(user).success);
-  // We are just going to use the schema and the first will be shape
-  // shape. - tells us what everything is 
-  //            ie. UserSchema.shape.age
-  // This will give us the type that is being used on the variable zodString, zodNumber, zodDate...
+  // In the user we can have an array of friends 
+  //            friends: ["Nena", "Yoda"]
 
-  // Using .partial() works just like TS partials
-  // .partial() - This makes everything optional
-  //        - For example if we remove one of the fields from user object, we'll still get all the fields since 
-  //          we are saying all fields are now optional
-  //        - This would be greate when we have a milti-step form or anywhere in a form where we have a partial user that we might want to check
-  //        - We can check this by hovering over the User type and see that we now have ? which is making everything optional
+  // If we save and log the user out we can see our return
+  //            console.log(UserSchema.parse(user));
 
-  // Using pick() ie .pick({username: true})
-  // We can use pick to select specific fields at the end of the object 
-  // Note that our user will only be able to contain the picked fields 
-  //            const user: User = { 
-  //              username: 'Marco', 
-  //            }
+  // If we want to get the actual schema of the elements we use
+  //            UserSchema.shape.friends.element
+  // Hovering over element will return the type of our array
 
-  // Using omit() ie .omit({hobby: true})
-  // We can omit certain keys we don't want 
-  // if we look at the user type it has everything except for hobby
+  // nonempty() - We can make sure the array is not empty
+  //            friends: z.array(z.string()).nonempty(),
+  // If the array is empty it will throw an error. 
 
-  // deepPartial() - Works just like a partial, but it makes sure it goes nested down.
-  //                 So if we have objects nested in objects nested in more object, it wil make all of them partial
-
-  // .extend()  ie. .extend({ name : z.string()})
-  // - We can extend to the end of the object by adding something else 
-  // - Now are user object would need to have an additional name field for it to be valid
-
-  // .merge() ie. .merge(z.object({ name: z.string() }))
-  // - If we have multiple schemas we can do a merge
-  // - From here we could pass in another schema 
-  
-  // Final thing is what happens if we define a key that is not a username, we get an error
-  // passthrough() 
-  // - Allows us to pass any additional keys defined in the objec and we can see them be returned
-
-  //              const user: User = { 
-  //                username: 'Marco',
-  //                name: 'Eddie'
-  //              }
-
-  // We can use strict() to make sure that nothing we don't want is being passed in the object
-  // const UserSchema = z.object({
-  //   username: z.string(),
-  // }).strict()
+  // We can also specify a min(), max(), or a hard coded length
 }

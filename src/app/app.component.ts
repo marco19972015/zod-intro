@@ -15,112 +15,95 @@ export default class AppComponent implements OnInit {
 
     const UserSchema = z.object({
       username: z.string(),
-      age: z.number().default(Math.random),
-      birthdate: z.date().optional(),
-      isProgrammer: z.boolean().optional(),
-      hobby: z.enum(hobbies)
-    })
-
+    }).strict()
+    
     type User = z.infer<typeof UserSchema>
 
     const user: User = { 
-      username: 'Marco', 
-      birthdate: new Date(),
-      isProgrammer: false, 
-      hobby: "Programmer"
+      username: 'Marco',
+      
     }
 
-    console.log(UserSchema.safeParse(user).success);
+    console.log(UserSchema.parse(user));
     
   }
+// ----------------------------------------------------------------------------------------------------------------------------------------
+  // const hobbies = ["Programmer", "Weight Lifting", "Guitar"] as const
 
+  // const UserSchema = z
+  // .object({
+  //   username: z.string(),
+  //   age: z.number().default(Math.random),
+  //   birthdate: z.date(),
+  //   isProgrammer: z.boolean(),
+  //   hobby: z.enum(hobbies)
+  // })
+  // .merge(z.object({ name: z.string() }))
+  
+
+  // type User = z.infer<typeof UserSchema>
+
+  // const user: User = { 
+  //   username: 'Marco', 
+  //   age: 25,
+  //   birthdate: new Date(),
+  //   isProgrammer: true,
+  // }
+
+  // console.log(UserSchema.partial().parse(user));
+// ----------------------------------------------------------------------------------------------------------------------------------------
   // In order to use ZOD we import the object z from 'zod'
   // The z object does everything we want to do with zod (no need to worry about anything else)
 
-  // In version 4 - In this version we'll go over valiadtions
+  // In version 5 - We go over some "things" that we can do with the Object type
 
-  // How we can do validation beyond just checking if something extists and if it's the right type 
-  // Because thats considered simple and can be done with TS
+  // So instead of using parsing an individual in line 33 
+  //            console.log(UserSchema.safeParse(user).success);
+  // We are just going to use the schema and the first will be shape
+  // shape. - tells us what everything is 
+  //            ie. UserSchema.shape.age
+  // This will give us the type that is being used on the variable zodString, zodNumber, zodDate...
 
-  
-  // Every single type inside of ZOD will have different types of validations that we can apply ie. optional()
-  // optional() - avaliable on pretty much any type
+  // Using .partial() works just like TS partials
+  // .partial() - This makes everything optional
+  //        - For example if we remove one of the fields from user object, we'll still get all the fields since 
+  //          we are saying all fields are now optional
+  //        - This would be greate when we have a milti-step form or anywhere in a form where we have a partial user that we might want to check
+  //        - We can check this by hovering over the User type and see that we now have ? which is making everything optional
 
-  // Things like string have a lot of additional validations
-
-  // z.string().min() - allows us to define the minimum length
-  //              username: z.string().min(3),
-  //              - Must be at least 3 characters long
-  // have a username >= 3 characters long causes the validation to fail
-  // z.string().max() - same concept, we just set a max on 
-  // z.string().email
-  // z.string().url
-  // AND MANY MORE
-
-  // For a number we have 
-  // z.number().gt(0) - where gt means greater than 0 for validation to be true
-
-  // Same thing for data and same thing for boolean
-
-
-  // Some types of validations that are avaialble on pretty much everything we are discussing are 
-  // optional() - just saying it doesn't need to be there
-  // nullable() - essentially means that it can be the value of null
-  // nullish() - allows us to use undefined AND null 
-
-
-  // We can also define default values 
-  // isProgrammer: z.boolean().default(true) - if we don't define a field, our validation will pass since it defaults back to the "default value" that was set
-  
-  // We can also pass a function to default
-  // age: z.number().default(Math.random()) - will give us a random number and set it as default
-
-  // Using the literal() function
-  // z.literal(true) - the field it's being used in always needs to be the exact value of true or we get an error
-
-
-  // lets say we want to make sure we have a list of values, but it doesnt matter what it is
-  // In that case an enum is really important. so we can do the following 
-  //            hobby: z.enum(["Programmer", "Weight Lifting", "Guitar"])
-  // In this cause hobby can either be Programmer, Weight Lifting, or Guitar and nothing else
-  // So if we have
+  // Using pick() ie .pick({username: true})
+  // We can use pick to select specific fields at the end of the object 
+  // Note that our user will only be able to contain the picked fields 
   //            const user: User = { 
   //              username: 'Marco', 
-  //              birthdate: new Date(),
-  //              isProgrammer: false, 
-  //              hobby: "Programmer"
-  //            }
-  // if we save this, the validation is true. If we have anything other than those three in the array we get false
-
-  // It is recommended to use z.enum over regular enums since it has better support
-  // If we do have an enum already defined we can wrap it around a z.nativeEnum
-
-  // lets say we took away the array and placed it in a const as so 
-  //              const hobbies = ["Programmer", "Weight Lifting", "Guitar"]
-
-  // We keep this
-  //            const UserSchema = z.object({
-  //              username: z.string(),
-  //              age: z.number().default(Math.random),
-  //              birthdate: z.date().optional(),
-  //              isProgrammer: z.boolean().optional(),
-  //              hobby: z.enum(hobbies)
-  //            }) 
-
-  //            type User = z.infer<typeof UserSchema>
-
-  //            const user: User = { 
-  //              username: 'Marco', 
-  //              birthdate: new Date(),
-  //              isProgrammer: false, 
-  //              hobby: "Programmer"
   //            }
 
-  // Line 107 will have an error with hobbies 
-  // The reason this happens is because the array could change, HOWEVER zod does not know that 
-  // We use as const at the end of the line
-  //            const hobbies = ["Programmer", "Weight Lifting", "Guitar"] as const
-  // This essentially makes it a read only array 
-  // If we hover over hobbies we can see that it's read only, which now means zod knows this hobbies array can't change
-  // For example, we woudn't be able to push into the array since it's read only 
+  // Using omit() ie .omit({hobby: true})
+  // We can omit certain keys we don't want 
+  // if we look at the user type it has everything except for hobby
+
+  // deepPartial() - Works just like a partial, but it makes sure it goes nested down.
+  //                 So if we have objects nested in objects nested in more object, it wil make all of them partial
+
+  // .extend()  ie. .extend({ name : z.string()})
+  // - We can extend to the end of the object by adding something else 
+  // - Now are user object would need to have an additional name field for it to be valid
+
+  // .merge() ie. .merge(z.object({ name: z.string() }))
+  // - If we have multiple schemas we can do a merge
+  // - From here we could pass in another schema 
+  
+  // Final thing is what happens if we define a key that is not a username, we get an error
+  // passthrough() 
+  // - Allows us to pass any additional keys defined in the objec and we can see them be returned
+
+  //              const user: User = { 
+  //                username: 'Marco',
+  //                name: 'Eddie'
+  //              }
+
+  // We can use strict() to make sure that nothing we don't want is being passed in the object
+  // const UserSchema = z.object({
+  //   username: z.string(),
+  // }).strict()
 }
